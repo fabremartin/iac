@@ -39,14 +39,11 @@ jobs:
         id: plan
 
       # Étape 6: Upload du Plan Terraform pour approbation manuelle
-      - name: Upload Terraform Plan as Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: terraform-plan
-          path: plan.tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
       # Étape 7: Attendre l'approbation manuelle pour appliquer le plan
       - name: Apply Terraform Plan (Manual Approval)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          terraform apply -auto-approve plan.tfplan
+          terraform apply -auto-approve tfplan
