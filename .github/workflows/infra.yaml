@@ -36,7 +36,7 @@ jobs:
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
         run: |
-          export TF_LOG=TRACE
+          export TF_LOG=DEBUG
           terraform plan -out=tfplan
         id: plan
         env:
@@ -48,7 +48,7 @@ jobs:
       - name: Apply Terraform Plan (Manual Approval)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          export TF_LOG=TRACE
+          export TF_LOG=DEBUG
           terraform apply -auto-approve tfplan
         env:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
