@@ -12,7 +12,7 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     environment:
-      name: production
+      name: prod
 
     steps:
       # Étape 1: Checkout du code source
@@ -44,9 +44,7 @@ jobs:
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
-        run: |
-          export TF_LOG=DEBUG
-          terraform plan -out=tfplan
+        run: terraform plan -out=tfplan
         id: plan
         env:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
