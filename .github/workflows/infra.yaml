@@ -17,6 +17,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Create SSH Key for FluxCD
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.FLUXCD_KEY }}" > ~/.ssh/fluxcd-key
+          echo "${{ secrets.FLUXCD_KEY_PUB }}" > ~/.ssh/fluxcd-key.pub
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/fluxcd-key
+          chmod 644 ~/.ssh/fluxcd-key.pub
+
+
       # Étape 2: Configurer Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
@@ -47,3 +57,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           terraform apply -auto-approve tfplan
+        env:
+          TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
+          TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
+          TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}

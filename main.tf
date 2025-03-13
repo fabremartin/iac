@@ -96,9 +96,9 @@ resource "kubernetes_secret" "flux_git_auth" {
 
   type = "Opaque"
   data = {
-    identity       = file("~/.ssh/fluxcd-key")
-    "identity.pub" = file("~/.ssh/fluxcd-key.pub")
-    known_hosts    = file("~/.ssh/known_hosts")
+    identity       = var.fluxcd_key
+    "identity.pub" = var.fluxcd_key_pub
+    known_hosts    = var.known_hosts
   }
 
   depends_on = [helm_release.flux]
