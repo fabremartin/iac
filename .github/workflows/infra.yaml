@@ -27,10 +27,7 @@ jobs:
       - name: Set up Azure Credentials
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Étape 4: Initialiser Terraform
       - name: Terraform Init
@@ -52,4 +49,4 @@ jobs:
       - name: Apply Terraform Plan (Manual Approval)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          terraform apply plan.tfplan
+          terraform apply -auto-approve plan.tfplan
