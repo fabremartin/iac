@@ -11,6 +11,8 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    environment:
+      name: production
 
     steps:
       # Étape 1: Checkout du code source
@@ -58,6 +60,9 @@ jobs:
           export TF_LOG=DEBUG
           terraform apply -auto-approve tfplan
         env:
-          TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
-          TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
-          TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+            TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
+            TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
+            TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+  
+
