@@ -53,3 +53,10 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           terraform apply plan.tfplan
+
+#ajout du apply de flux/gitops
+#kubectl apply -f du kustomize
+#Manual destroy
+#az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --overwrite-existing  pour rewrite du context kube
+#automatiser lorsque nouvelle version du json-server update manifest du gitops via workflow
+#voir partie + sre (grafana etc)

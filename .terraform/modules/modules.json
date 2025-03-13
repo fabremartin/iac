@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"aks_infra","Source":"./aks_infra","Dir":"aks_infra"},{"Key":"gitops","Source":"./gitops","Dir":"gitops"},{"Key":"landing_zone","Source":"./landing_zone","Dir":"landing_zone"}]}
