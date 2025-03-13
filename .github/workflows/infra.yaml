@@ -35,7 +35,9 @@ jobs:
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
-        run: terraform plan -out=tfplan -log=TRACE
+        run: |
+          export TF_LOG=TRACE
+          terraform plan -out=tfplan
         id: plan
 
       # Étape 7: Attendre l'approbation manuelle pour appliquer le plan
