@@ -26,7 +26,8 @@ resource "helm_release" "flux" {
   create_namespace = true
 
   depends_on = [
-    var.aks_cluster
+    var.aks_cluster,
+    var.cluster_ready
   ]
 }
 
@@ -43,7 +44,7 @@ resource "kubernetes_secret" "flux_git_auth" {
     known_hosts    = var.known_hosts
   }
 
-  depends_on = [helm_release.flux]
+  depends_on = [helm_release.flux, var.cluster_ready]
 }
 
 # Ressource GitRepository pour FluxCD // A jouer après avoir déployer l'infra + flux
@@ -68,7 +69,8 @@ resource "kubernetes_manifest" "flux_git_repository" {
   depends_on = [
     helm_release.flux,
     kubernetes_secret.flux_git_auth,
-    var.aks_cluster
+    var.aks_cluster,
+    var.cluster_ready
   ]
 }
 
@@ -93,6 +95,7 @@ resource "kubernetes_manifest" "flux_kustomization" {
   }
 
   depends_on = [
-    kubernetes_manifest.flux_git_repository
+    kubernetes_manifest.flux_git_repository,
+    var.cluster_ready
   ]
 }

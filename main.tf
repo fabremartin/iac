@@ -74,9 +74,7 @@ module "gitops" {
   fluxcd_key      = var.fluxcd_key
   fluxcd_key_pub  = var.fluxcd_key_pub
   known_hosts     = var.known_hosts
-  depends_on = [
-    null_resource.wait_for_cluster
-  ]
+  cluster_ready =  null_resource.wait_for_cluster.id
 }
 
 # Output: Display kubeconfig infos to connect

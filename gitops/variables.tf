@@ -28,3 +28,8 @@ variable "known_hosts" {
   type      = string
   sensitive = true
 }
+
+variable "cluster_ready" {
+  description = "ID of the resource that indicates the cluster is ready"
+  type        = string
+}
