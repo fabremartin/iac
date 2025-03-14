@@ -1,3 +1,10 @@
 terraform.tfstate
 terraform.tfstate.backup
+<<<<<<< HEAD
 .terraform
+=======
+.terraform
+kubeconfig.yaml
+gitops/.terraform.lock.hcl
+.terraform.lock.hcl
+>>>>>>> 6c4905a... gitignore
