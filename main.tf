@@ -105,7 +105,7 @@ resource "kubernetes_secret" "flux_git_auth" {
 }
 
 # Ressource GitRepository pour FluxCD // A jouer après avoir déployer l'infra + flux
-resource "kubernetes_manifest" "flux_git_repository" {
+/*resource "kubernetes_manifest" "flux_git_repository" {
   manifest = {
     apiVersion = "source.toolkit.fluxcd.io/v1beta1"
     kind       = "GitRepository"
@@ -153,7 +153,7 @@ resource "kubernetes_manifest" "flux_kustomization" {
   depends_on = [
     kubernetes_manifest.flux_git_repository
   ]
-}
+}*/
 
 
 # Output: Display kubeconfig infos to connect
