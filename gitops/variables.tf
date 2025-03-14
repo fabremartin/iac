@@ -9,17 +9,22 @@ variable "kubeconfig" {
   sensitive = true
 }
 
-variable "flux_helm_release" {
-  description = "Helm release for FluxCD"
-  type        = any
-}
-
-variable "flux_git_auth_secret" {
-  description = "FluxCD Git authentication secret"
-  type        = any
-}
-
 variable "aks_cluster" {
   description = "AKS Kubernetes Cluster"
   type        = any
+}
+
+variable "fluxcd_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "fluxcd_key_pub" {
+  type      = string
+  sensitive = true
+}
+
+variable "known_hosts" {
+  type      = string
+  sensitive = true
 }

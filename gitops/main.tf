@@ -1,11 +1,49 @@
+# Provider Kubernetes
 provider "kubernetes" {
-  config_path = "./kubeconfig.yaml"
+  host                   = jsondecode(var.kubeconfig)["host"]
+  client_certificate     = base64decode(jsondecode(var.kubeconfig)["client_certificate"])
+  client_key             = base64decode(jsondecode(var.kubeconfig)["client_key"])
+  cluster_ca_certificate = base64decode(jsondecode(var.kubeconfig)["cluster_ca_certificate"])
 }
 
+# Provider Helm
 provider "helm" {
   kubernetes {
-    config_path = "./kubeconfig.yaml"
+    host                   = jsondecode(var.kubeconfig)["host"]
+    client_certificate     = base64decode(jsondecode(var.kubeconfig)["client_certificate"])
+    client_key             = base64decode(jsondecode(var.kubeconfig)["client_key"])
+    cluster_ca_certificate = base64decode(jsondecode(var.kubeconfig)["cluster_ca_certificate"])
   }
+}
+
+# GitOps: FluxCD
+resource "helm_release" "flux" {
+  name       = "flux"
+  repository = "https://fluxcd-community.github.io/helm-charts"
+  chart      = "flux2"
+  namespace  = "flux-system"
+
+  create_namespace = true
+
+  depends_on = [
+    var.aks_cluster
+  ]
+}
+
+resource "kubernetes_secret" "flux_git_auth" {
+  metadata {
+    name      = "fluxcd-key"
+    namespace = "flux-system"
+  }
+
+  type = "Opaque"
+  data = {
+    identity       = var.fluxcd_key
+    "identity.pub" = var.fluxcd_key_pub
+    known_hosts    = var.known_hosts
+  }
+
+  depends_on = [helm_release.flux]
 }
 
 # Ressource GitRepository pour FluxCD // A jouer après avoir déployer l'infra + flux
@@ -28,8 +66,8 @@ resource "kubernetes_manifest" "flux_git_repository" {
   }
 
   depends_on = [
-    var.flux_helm_release,
-    var.flux_git_auth_secret,
+    helm_release.flux,
+    kubernetes_secret.flux_git_auth,
     var.aks_cluster
   ]
 }

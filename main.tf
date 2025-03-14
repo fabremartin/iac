@@ -8,24 +8,6 @@ provider "azurerm" {
   #subscription_id = "for deletion purpose"
 }
 
-# Helm for GitOps
-provider "helm" {
-  kubernetes {
-    host                   = azurerm_kubernetes_cluster.rg-test.kube_config.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.cluster_ca_certificate)
-  }
-}
-
-# Kubernetes provider for interacting with the cluster
-provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.rg-test.kube_config.0.host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-test.kube_config.0.cluster_ca_certificate)
-}
-
 # ResourceGroup creation
 resource "azurerm_resource_group" "rg-test" {
   name     = var.resource_group_name
@@ -73,59 +55,19 @@ resource "azurerm_role_assignment" "aks_acr_binding" {
   depends_on           = [azurerm_kubernetes_cluster.rg-test]
 }
 
-
-# GitOps: FluxCD
-resource "helm_release" "flux" {
-  name       = "flux"
-  repository = "https://fluxcd-community.github.io/helm-charts"
-  chart      = "flux2"
-  namespace  = "flux-system"
-
-  create_namespace = true
-
-  depends_on = [
-    azurerm_kubernetes_cluster.rg-test
-  ]
-}
-
-resource "kubernetes_secret" "flux_git_auth" {
-  metadata {
-    name      = "fluxcd-key"
-    namespace = "flux-system"
-  }
-
-  type = "Opaque"
-  data = {
-    identity       = var.fluxcd_key
-    "identity.pub" = var.fluxcd_key_pub
-    known_hosts    = var.known_hosts
-  }
-
-  depends_on = [helm_release.flux]
-}
-
 module "gitops" {
   source          = "./gitops"
   kubeconfig      = azurerm_kubernetes_cluster.rg-test.kube_config_raw
   gitops_repo_url = var.gitops_repo_url
-  flux_helm_release = helm_release.flux
-  flux_git_auth_secret = kubernetes_secret.flux_git_auth
-  aks_cluster         = azurerm_kubernetes_cluster.rg-test
+  aks_cluster     = azurerm_kubernetes_cluster.rg-test
+  fluxcd_key      = var.fluxcd_key
+  fluxcd_key_pub  = var.fluxcd_key_pub
+  known_hosts     = var.known_hosts
 }
 
 # Output: Display kubeconfig infos to connect
 output "kubeconfig" {
   value     = azurerm_kubernetes_cluster.rg-test.kube_config_raw
-  sensitive = true
-}
-
-output "flux_helm_release" {
-  value = helm_release.flux
-  sensitive = true
-}
-
-output "flux_git_auth_secret" {
-  value = kubernetes_secret.flux_git_auth
   sensitive = true
 }
 
