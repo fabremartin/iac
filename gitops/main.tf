@@ -1,15 +1,10 @@
-resource "local_file" "kubeconfig" {
-  content  = var.kubeconfig
-  filename = "${path.module}/kubeconfig.yaml"
-}
-
 provider "kubernetes" {
-  config_path = local_file.kubeconfig.filename
+  config_path = "${path.module}/kubeconfig.yaml"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = local_file.kubeconfig.filename
+    config_path = "${path.module}/kubeconfig.yaml"
   }
 }
 
