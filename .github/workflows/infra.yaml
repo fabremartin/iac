@@ -40,6 +40,11 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Set up Kubernetes credentials
+        run: |
+          az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --overwrite-existing
+      
+
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
         run: terraform plan -out=tfplan
