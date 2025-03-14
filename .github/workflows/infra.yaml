@@ -43,7 +43,7 @@ jobs:
 
       # Étape 4: Initialiser Terraform
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -upgrade
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
