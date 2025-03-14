@@ -1,3 +1,6 @@
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
+kubeconfig.yaml
+gitops/.terraform.lock.hcl
+.terraform.lock.hcl

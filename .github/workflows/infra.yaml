@@ -1,12 +1,12 @@
-name: Terraform Workflow
+name: infra-workflow
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'mickey'
+        required: true
+        default: 'prd'
 
 jobs:
   terraform:
@@ -17,11 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Show contents of kubeconfig
-        run: cat $KUBECONFIG
-        env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG_PATH }}
-          
       # Étape 2: Configurer Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
@@ -43,7 +38,12 @@ jobs:
 
       # Étape 4: Initialiser Terraform
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -upgrade
+
+      #- name: Get AKS Credentials
+      #  run: |
+       #   az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
+        #  echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
@@ -53,6 +53,7 @@ jobs:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
           TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
           TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          KUBECONFIG: ${{ env.KUBECONFIG }}
 
       # Étape 7: Attendre l'approbation manuelle pour appliquer le plan
       - name: Apply Terraform Plan (Manual Approval)
@@ -61,6 +62,7 @@ jobs:
             TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
             TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
             TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+            KUBECONFIG: ${{ env.KUBECONFIG }}
 
   
 
