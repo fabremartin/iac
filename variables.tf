@@ -1,11 +1,11 @@
 
 
 variable "resource_group_name" {
-  default = "aks-demo-rg"
+  default = "rg-1"
 }
 
 variable "aks_cluster_name" {
-  default = "aks-cluster"
+  default = "cluster-aks"
 }
 
 variable "location" {
@@ -28,7 +28,7 @@ variable "kubernetes_version" {
 variable "acr_name" {
   description = "Azure Container Registry Name"
   type        = string
-  default     = "regsitry11032025"
+  default     = "regsitry14032025"
 }
 
 variable "sku" {
