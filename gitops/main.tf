@@ -4,6 +4,9 @@ provider "kubernetes" {
   client_certificate     = base64decode(jsondecode(var.kubeconfig)["client_certificate"])
   client_key             = base64decode(jsondecode(var.kubeconfig)["client_key"])
   cluster_ca_certificate = base64decode(jsondecode(var.kubeconfig)["cluster_ca_certificate"])
+
+    ignore_annotations = [".*"]
+    ignore_labels = [".*"]
 }
 
 # Provider Helm
@@ -30,6 +33,12 @@ resource "helm_release" "flux" {
   ]
 }
 
+# Add this after the helm_release for flux
+resource "time_sleep" "wait_for_flux" {
+  depends_on = [helm_release.flux]
+  create_duration = "30s"
+}
+
 resource "kubernetes_secret" "flux_git_auth" {
   metadata {
     name      = "fluxcd-key"
@@ -43,70 +52,64 @@ resource "kubernetes_secret" "flux_git_auth" {
     known_hosts    = var.known_hosts
   }
 
-  depends_on = [helm_release.flux]
+  depends_on = [time_sleep.wait_for_flux]
 }
 
-# Use null_resource instead of kubernetes_manifest
-resource "null_resource" "flux_git_setup" {
-  triggers = {
-    kubeconfig_changed = md5(var.kubeconfig)
-    git_repo_url       = var.gitops_repo_url
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      # Create a temporary kubeconfig file
-      echo '${var.kubeconfig}' > kubeconfig.tmp
-      
-      # Wait for flux to be ready
-      kubectl --kubeconfig=kubeconfig.tmp wait --for=condition=available --timeout=120s -n flux-system deployment/helm-controller deployment/source-controller deployment/kustomize-controller || true
-      sleep 20  # Extra safety delay
-      
-      # Create GitRepository manifest as YAML
-      cat > git-repository.yaml <<EOF
-      apiVersion: source.toolkit.fluxcd.io/v1beta1
-      kind: GitRepository
-      metadata:
-        name: flux-repo
-        namespace: flux-system
-      spec:
-        url: ${var.gitops_repo_url}
-        secretRef:
-          name: fluxcd-key
-        interval: 1m
-        ref:
-          branch: main
-      EOF
-      
-      # Create Kustomization manifest as YAML
-      cat > kustomization.yaml <<EOF
-      apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
-      kind: Kustomization
-      metadata:
-        name: kustomization
-        namespace: flux-system
-      spec:
-        interval: 10m
-        path: .
-        sourceRef:
-          kind: GitRepository
-          name: flux-repo
-        targetNamespace: default
-        prune: true
-      EOF
-      
-      # Apply the manifests
-      kubectl --kubeconfig=kubeconfig.tmp apply -f git-repository.yaml
-      kubectl --kubeconfig=kubeconfig.tmp apply -f kustomization.yaml
-      
-      # Cleanup
-      rm kubeconfig.tmp git-repository.yaml kustomization.yaml
-    EOT
-    interpreter = ["/bin/bash", "-c"]
+# Ressource GitRepository pour FluxCD // A jouer après avoir déployer l'infra + flux
+resource "kubernetes_manifest" "flux_git_repository" {
+  manifest = {
+    apiVersion = "source.toolkit.fluxcd.io/v1beta1"
+    kind       = "GitRepository"
+    metadata = {
+      name      = "flux-repo"
+      namespace = "flux-system"
+    }
+    spec = {
+      url       = var.gitops_repo_url
+      secretRef = { name = "fluxcd-key" }
+      interval  = "1m"
+      ref = {
+        branch = "main"
+      }
+    }
   }
 
   depends_on = [
+    helm_release.flux,
     kubernetes_secret.flux_git_auth,
-    var.aks_cluster
+    var.aks_cluster,
   ]
+
+    lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "kubernetes_manifest" "flux_kustomization" {
+  manifest = {
+    apiVersion = "kustomize.toolkit.fluxcd.io/v1beta1"
+    kind       = "Kustomization"
+    metadata = {
+      name      = "kustomization"
+      namespace = "flux-system"
+    }
+    spec = {
+      interval = "10m"
+      path     = "."
+      sourceRef = {
+        kind = "GitRepository"
+        name = "flux-repo"
+      }
+      targetNamespace = "default"
+      prune = true
+    }
+  }
+
+  depends_on = [
+    kubernetes_manifest.flux_git_repository,
+  ]
+
+    lifecycle {
+    ignore_changes = all
+  }
 }

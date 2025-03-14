@@ -38,17 +38,6 @@ resource "azurerm_kubernetes_cluster" "rg-test" {
   }
 }
 
-# Ajouter un délai d'attente pour s'assurer que le cluster est prêt
-resource "null_resource" "wait_for_cluster" {
-  provisioner "local-exec" {
-    command = "kubectl --kubeconfig=${azurerm_kubernetes_cluster.rg-test.kube_config_raw} get nodes"
-  }
-
-  depends_on = [
-    azurerm_kubernetes_cluster.rg-test
-  ]
-}
-
 # ACR
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
