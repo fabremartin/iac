@@ -1,12 +1,10 @@
-name: Configure FluxCD GitRepository
+name: flux-workflow
 
 on:
-  workflow_dispatch:  # Manual trigger
-  # Or trigger when infrastructure is deployed
-  # workflow_run:
-  #   workflows: ["Deploy Infrastructure"]
-  #   types:
-  #     - completed
+    workflow_run:
+      workflows: ["infra-workflow"]
+      types:
+        - completed 
 
 jobs:
   configure-flux:

@@ -1,4 +1,4 @@
-name: Terraform Workflow
+name: infra-workflow
 
 on:
   push:
