@@ -40,10 +40,10 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Set up Kubernetes credentials
+      - name: Get AKS Credentials
         run: |
-          az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --overwrite-existing
-      
+          az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
+          echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
@@ -53,6 +53,7 @@ jobs:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
           TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
           TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          KUBECONFIG: ${{ env.KUBECONFIG }}
 
       # Étape 7: Attendre l'approbation manuelle pour appliquer le plan
       - name: Apply Terraform Plan (Manual Approval)
@@ -61,6 +62,7 @@ jobs:
             TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
             TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
             TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+            KUBECONFIG: ${{ env.KUBECONFIG }}
 
   
 
