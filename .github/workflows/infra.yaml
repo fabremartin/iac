@@ -40,10 +40,10 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Get AKS Credentials
-        run: |
-          az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
-          echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
+      #- name: Get AKS Credentials
+      #  run: |
+       #   az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
+        #  echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
