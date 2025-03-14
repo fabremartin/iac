@@ -1,11 +1,6 @@
 # Azure
 provider "azurerm" {
-  features {
-    /*resource_group {
-      prevent_deletion_if_contains_resources = false
-    }*/
-  }
-  #subscription_id = "for deletion purpose"
+  features {}
 }
 
 # ResourceGroup creation
@@ -55,14 +50,13 @@ resource "azurerm_role_assignment" "aks_acr_binding" {
   depends_on           = [azurerm_kubernetes_cluster.rg-test]
 }
 
-module "gitops" {
-  source          = "./gitops"
-  kubeconfig      = azurerm_kubernetes_cluster.rg-test.kube_config_raw
-  gitops_repo_url = var.gitops_repo_url
-  aks_cluster     = azurerm_kubernetes_cluster.rg-test
-  fluxcd_key      = var.fluxcd_key
-  fluxcd_key_pub  = var.fluxcd_key_pub
-  known_hosts     = var.known_hosts
+# Flux installation (only install the base components)
+module "flux_install" {
+  source     = "./flux-install"
+  kubeconfig = azurerm_kubernetes_cluster.rg-test.kube_config_raw
+  fluxcd_key = var.fluxcd_key
+  fluxcd_key_pub = var.fluxcd_key_pub
+  known_hosts = var.known_hosts
 }
 
 # Output: Display kubeconfig infos to connect
@@ -71,3 +65,11 @@ output "kubeconfig" {
   sensitive = true
 }
 
+# Output the cluster name and resource group for use in CI/CD
+output "cluster_name" {
+  value = azurerm_kubernetes_cluster.rg-test.name
+}
+
+output "resource_group_name" {
+  value = azurerm_resource_group.rg-test.name
+}
