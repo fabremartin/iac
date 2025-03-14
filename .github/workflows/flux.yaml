@@ -36,7 +36,7 @@ jobs:
         
       - name: Setup Kubernetes Config
         run: |
-            az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
+            az aks get-credentials --resource-group rg-1 --name cluster-aks --file kubeconfig.yaml
             echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
       - name: Configure Flux with Git Repository
