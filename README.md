@@ -121,12 +121,18 @@ To destroy the infrastructure:
 terraform destroy
 ```
 
-## Security Considerations & Potential upgrades
+## Security Considerations & Potential Upgrades
 
-- Consider using a more secure method like Azure Key Vault.
-- The AKS cluster uses a system-assigned managed identity, which is a good secure practice.
-- Consider enabling network policies and private endpoints for enhanced security.
-- Setting Up Azure Storage Backend for the tfstate, which would allow more flexibility and re-run failed workflow jobs.
+- **Use Azure Key Vault** for secure storage of secrets and manage access via **Azure RBAC**.
+- **System-assigned Managed Identity** for AKS enhances security by avoiding credentials management. Consider using **Azure AD** integration for tighter access control.
+- Enable **Network Policies** and use **Private Endpoints** for services to restrict access to private networks.
+- Store **Terraform state** in **Azure Blob Storage** for collaboration, state locking, and versioning.
+- Automate **Grafana deployment** with Terraform and assign appropriate **Azure RBAC roles** for secure access.
+- Set up a **full landing zone** with **VNET**, **IAM**, **Key Vault**, **NSGs**, and **Firewalls** for enhanced security.
+- Follow **least privilege access** with **MFA** for privileged accounts and regularly audit permissions.
+- Enable **Azure Monitor** and **Security Center** for threat detection and use **Azure Sentinel** for security incident management.
+- Implement **backup and disaster recovery** plans to ensure business continuity.
+
 
 
 ## Links
