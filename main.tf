@@ -59,9 +59,12 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
   dns_prefix = "aks-demo-cluster"
 
   default_node_pool {
-    name       = "default"
-    node_count = var.node_count
-    vm_size    = var.node_size
+    name                 = "default"
+    node_count           = var.node_count
+    vm_size              = var.node_size
+    auto_scaling_enabled = true
+    min_count            = var.node_count
+    max_count            = var.node_count
   }
 
   tags = {
@@ -73,24 +76,6 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
   }
 }
 
-# Prevent node from being accidentally deleted :)
-resource "azurerm_kubernetes_cluster_node_pool" "autoscale_pool" {
-  name                  = "autoscale"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.rg-1.id
-  vm_size               = var.node_size
-  node_count            = var.node_count
-  auto_scaling_enabled  = true
-  min_count             = 1
-  max_count             = var.node_count
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    Environment = "Production"
-  }
-}
 
 # ACR
 resource "azurerm_container_registry" "acr" {
