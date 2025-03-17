@@ -82,9 +82,16 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled       = true
 }
 
+# Get the kubelet identity
+data "azurerm_user_assigned_identity" "kubelet_identity" {
+  resource_group_name = azurerm_kubernetes_cluster.rg-1.node_resource_group
+  name                = "${azurerm_kubernetes_cluster.rg-1.name}-agentpool"
+  depends_on          = [azurerm_kubernetes_cluster.rg-1]
+}
+
 # Link ACR to AKS
 resource "azurerm_role_assignment" "aks_acr_binding" {
-  principal_id         = azurerm_kubernetes_cluster.rg-1.identity[0].principal_id
+  principal_id         = data.azurerm_user_assigned_identity.kubelet_identity.principal_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.acr.id
   depends_on           = [azurerm_kubernetes_cluster.rg-1]
