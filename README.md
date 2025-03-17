@@ -121,8 +121,15 @@ To destroy the infrastructure:
 terraform destroy
 ```
 
-## Security Considerations
+## Security Considerations & Potential upgrades
 
 - Consider using a more secure method like Azure Key Vault.
 - The AKS cluster uses a system-assigned managed identity, which is a good secure practice.
 - Consider enabling network policies and private endpoints for enhanced security.
+- Setting Up Azure Storage Backend for the tfstate, which would allow more flexibility and re-run failed workflow jobs.
+
+
+## Links
+- [iac repo](https://github.com/fabremartin/iac)
+- [gitops repo](https://github.com/fabremartin/gitops)
+- [json-server repo](https://github.com/fabremartin/json-server)
