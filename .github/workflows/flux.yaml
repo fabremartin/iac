@@ -6,15 +6,19 @@ jobs:
   configure-flux:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: source code checkout
       - name: Checkout
         uses: actions/checkout@v3
-        
+      
+      # Step 2: Flux setup
       - name: Install Flux CLI
         uses: fluxcd/flux2/action@main
         
+      # Step 3: Kube setup
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
 
+      # Step 4: Azure env setup
       - name: Set up Azure environment variables
         run: |
           echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
@@ -22,17 +26,19 @@ jobs:
           echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CREDENTIALS.clientSecret }}" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=${{ secrets.AZURE_CREDENTIALS.tenantId }}" >> $GITHUB_ENV
 
-      # Étape 3: Authentification à Azure
+      # Step 5: Azure login
       - name: Set up Azure Credentials
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} 
         
+      # Step 6: Kube config
       - name: Setup Kubernetes Config
         run: |
             az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
             echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
+      # Step 7: GitOps Configuration (Kustomize and GitRepo)
       - name: Configure GitOps
         run: |
             # Check if Flux controllers are ready

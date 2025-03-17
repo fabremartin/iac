@@ -38,7 +38,6 @@ resource "azurerm_dashboard_grafana" "example" {
   grafana_major_version = 10
   resource_group_name = azurerm_resource_group.rg-1.name
   location            = azurerm_resource_group.rg-1.location
-  sku                 = var.sku
 
   identity {
     type = "SystemAssigned"
