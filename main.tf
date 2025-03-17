@@ -32,6 +32,7 @@ resource "azurerm_resource_group" "rg-1" {
   location = var.location
 }
 
+# Grafana creation
 resource "azurerm_dashboard_grafana" "example" {
   name                = var.grafana_name
   grafana_major_version = 10
