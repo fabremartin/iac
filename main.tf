@@ -73,6 +73,25 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
   }
 }
 
+# Prevent node from being accidentally deleted :)
+resource "azurerm_kubernetes_cluster_node_pool" "autoscale_pool" {
+  name                  = "autoscale"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.rg-1.id
+  vm_size               = var.node_size
+  node_count            = var.node_count
+  auto_scaling_enabled  = true
+  min_count             = 1
+  max_count             = var.node_count
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  tags = {
+    Environment = "Production"
+  }
+}
+
 # ACR
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
