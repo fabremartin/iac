@@ -37,12 +37,6 @@ variable "sku" {
   default     = "Basic"
 }
 
-variable "gitops_repo_url" {
-  description = "Git repository URL for Flux CD"
-  type        = string
-  default     = "https://github.com/fabremartin/gitops"
-}
-
 variable "fluxcd_key" {
   type      = string
   sensitive = true
@@ -56,4 +50,9 @@ variable "fluxcd_key_pub" {
 variable "known_hosts" {
   type      = string
   sensitive = true
+}
+
+variable "grafana_name" {
+  type = string
+  default = "grafana-1"
 }

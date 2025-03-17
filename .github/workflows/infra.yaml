@@ -1,12 +1,16 @@
 name: infra-workflow
 
 on:
+<<<<<<< HEAD
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+=======
+  workflow_dispatch:
+>>>>>>> f80325f...  update GitOps repository configuration
 
 jobs:
   terraform:

@@ -1,0 +1,47 @@
+name: flux-workflow
+
+on:
+    workflow_dispatch:
+
+jobs:
+  configure-flux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Install Flux CLI
+        uses: fluxcd/flux2/action@main
+        
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Set up Azure environment variables
+        run: |
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=${{ secrets.AZURE_CREDENTIALS.clientId }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CREDENTIALS.clientSecret }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ secrets.AZURE_CREDENTIALS.tenantId }}" >> $GITHUB_ENV
+
+      # Étape 3: Authentification à Azure
+      - name: Set up Azure Credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} 
+        
+      - name: Setup Kubernetes Config
+        run: |
+            az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
+            echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
+
+      - name: Configure GitOps
+        run: |
+            # Check if Flux controllers are ready
+            kubectl -n flux-system wait --for=condition=available --timeout=180s deployment/source-controller deployment/kustomize-controller
+          
+            # Apply GitRepository and Kustomization directly from your repo's files
+            kubectl apply -f ./flux/git-repository.yaml
+            kubectl apply -f ./flux/kustomization.yaml
+          
+            echo "FluxCD has been configured successfully!"
+          
