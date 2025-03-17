@@ -32,8 +32,8 @@ resource "azurerm_resource_group" "rg-1" {
   location = var.location
 }
 
-# Grafana creation
-resource "azurerm_dashboard_grafana" "example" {
+# Grafana creation - Skipping this for now
+/*resource "azurerm_dashboard_grafana" "example" {
   name                = var.grafana_name
   grafana_major_version = 10
   resource_group_name = azurerm_resource_group.rg-1.name
@@ -43,10 +43,10 @@ resource "azurerm_dashboard_grafana" "example" {
     type = "SystemAssigned"
   }
 
-  /*tags = {
+  tags = {
     Environment = "Production" //Not needed now
-  }*/
-}
+  }
+}*/
 
 
 # AKS Cluster creation
