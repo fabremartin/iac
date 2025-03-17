@@ -2,12 +2,6 @@ name: flux-workflow
 
 on:
     workflow_dispatch:
-      inputs:
-        environment:
-          description: 'mickey'
-          required: true
-          default: 'prd'
-
 jobs:
   configure-flux:
     runs-on: ubuntu-latest
@@ -36,34 +30,16 @@ jobs:
         
       - name: Setup Kubernetes Config
         run: |
-            az aks get-credentials --resource-group rg-1 --name cluster-aks --file kubeconfig.yaml
+            az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
             echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
-      - name: Configure Flux with Git Repository
+      - name: Configure GitOps
         run: |
-          # Check if Flux controllers are ready
-          kubectl -n flux-system wait --for=condition=available --timeout=180s deployment/source-controller deployment/kustomize-controller
+            # Check if Flux controllers are ready
+            kubectl -n flux-system wait --for=condition=available --timeout=180s deployment/source-controller deployment/kustomize-controller
           
-          # Create or update the GitRepository
-          flux create source git flux-repo \
-            --url=${{ secrets.GIT_REPOSITORY_URL }} \
-            --branch=main \
-            --secret-ref=fluxcd-key \
-            --namespace=flux-system \
-            --export > git-repository.yaml
-            
-          kubectl apply -f git-repository.yaml
+            # Apply GitRepository and Kustomization directly from your repo's files
+            kubectl apply -f ./gitops/git-repository.yaml
+            kubectl apply -f ./gitops/kustomization.yaml
           
-          # Create the Kustomization
-          flux create kustomization kustomization \
-            --source=flux-repo \
-            --path="." \
-            --prune=true \
-            --interval=10m \
-            --target-namespace=default \
-            --namespace=flux-system \
-            --export > kustomization.yaml
-            
-          kubectl apply -f kustomization.yaml
-          
-          echo "FluxCD has been configured successfully!"
+            echo "FluxCD & Gitops have been configured successfully!"

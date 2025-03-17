@@ -2,12 +2,7 @@ name: infra-workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'mickey'
-        required: true
-        default: 'prd'
-
+  
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -39,11 +34,6 @@ jobs:
       # Étape 4: Initialiser Terraform
       - name: Terraform Init
         run: terraform init -upgrade
-
-      #- name: Get AKS Credentials
-      #  run: |
-       #   az aks get-credentials --resource-group aks-demo-rg --name aks-cluster --file kubeconfig.yaml
-        #  echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
 
       # Étape 5: Générer le Plan Terraform
       - name: Terraform Plan
