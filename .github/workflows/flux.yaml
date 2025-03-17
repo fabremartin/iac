@@ -39,7 +39,7 @@ jobs:
             kubectl -n flux-system wait --for=condition=available --timeout=180s deployment/source-controller deployment/kustomize-controller
           
             # Apply GitRepository and Kustomization directly from your repo's files
-            kubectl apply -f ./flux/git-repository.yaml
-            kubectl apply -f ./flux/kustomization.yaml
+            kubectl apply -f ./gitops/git-repository.yaml
+            kubectl apply -f ./gitops/kustomization.yaml
           
-            echo "FluxCD has been configured successfully!"
+            echo "FluxCD & Gitops have been configured successfully!"
