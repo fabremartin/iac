@@ -53,6 +53,6 @@ variable "known_hosts" {
 }
 
 variable "grafana_name" {
-  type = string
+  type    = string
   default = "grafana-1"
 }
