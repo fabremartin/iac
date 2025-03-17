@@ -76,7 +76,6 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
   }
 }
 
-
 # ACR
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
