@@ -9,6 +9,10 @@ This solution follows a two-phased approach:
 1. **Infrastructure Provisioning**: Using Terraform to create the AKS cluster, container registry, Azure Managed Grafana, and base FluxCD installation.
 2. **GitOps Configuration**: Using FluxCD CLI in a CI/CD pipeline to configure the GitRepository and Kustomization resources.
 
+## IAC global architecture 
+![image](https://github.com/user-attachments/assets/57824e50-8703-40f0-84da-5fb7c3eeff61)
+
+
 ## Gitops global architecture
 
 ![image](https://github.com/user-attachments/assets/415bcd12-1d03-4ce8-ad9e-86839cd98818)
