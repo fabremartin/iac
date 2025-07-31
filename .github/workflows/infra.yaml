@@ -27,9 +27,8 @@ jobs:
         with:
           terraform_version: '1.4.0'
           terraform_wrapper: false
-
           
-      # Step 3: Azure Login pour kubectl
+      # Step 3: Azure Login
       - name: Set up Azure Credentials
         uses: azure/login@v1
         with:
@@ -60,7 +59,7 @@ jobs:
           cd infra/
           terraform apply -auto-approve tfplan
 
-  # Job 2: Applications Kubernetes (après infrastructure)
+  # Job 2: Kubernetes
   kubernetes:
     needs: infra
     runs-on: ubuntu-latest
@@ -78,7 +77,7 @@ jobs:
           terraform_version: '1.4.0'
           terraform_wrapper: false
 
-      # Step 3: Azure Login pour kubectl
+      # Step 3: Azure Login
       - name: Set up Azure Credentials
         uses: azure/login@v1
         with:
@@ -119,7 +118,7 @@ jobs:
           TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
           TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      # Step 8: Vérification finale
+      # Step 8: Final check
       - name: Verify Deployment
         run: |
           kubectl get namespaces

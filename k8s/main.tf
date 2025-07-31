@@ -1,7 +1,7 @@
 data "terraform_remote_state" "infra" {
   backend = "azurerm"
   config = {
-    resource_group_name  = "rg-1"
+    resource_group_name  = "rg-terraform-backend"
     storage_account_name = "tfbackend62400"
     container_name       = "tfstate"
     key                  = "infra.terraform.tfstate"
