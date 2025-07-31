@@ -28,32 +28,26 @@ jobs:
           terraform_version: '1.4.0'
           terraform_wrapper: false
 
+      # Step 3: Bootstrap backend if needed
+      - name: Ensure backend exists
+        run: |
+          az group create --name rg-terraform-backend --location westeurope || true
+          az storage account create --name tfbackend62400 --resource-group rg-terraform-backend --sku Standard_LRS || true
+          az storage container create --name tfstate --account-name tfbackend62400 || true
+
       # Step 3: Terraform Init Infra
       - name: Terraform Init Infrastructure
         run: |
           cd infra/
           terraform init -upgrade
 
-      # Step 4: Check and import if resource exists
-      - name: Import existing Resource Group if exists
-        run: |
-          cd infra/
-          
-          # Check if the RG exists in Azure
-          if az group show --name "rg-1" >/dev/null 2>&1; then
-            echo "Resource Group exists - Importing..."
-            terraform import azurerm_resource_group.rg-1 /subscriptions/21a0af28-30ac-4bc4-8d63-e24531e7bd6c/resourceGroups/rg-1 || true
-          else
-            echo "Resource Group doesn't exist - Will be created by Terraform"
-          fi
-
-      # Step 5: Terraform Plan Infra
+      # Step 4: Terraform Plan Infra
       - name: Terraform Plan Infrastructure
         run: |
           cd infra/
           terraform plan -out=tfplan
 
-      # Step 6: Terraform Apply Infra
+      # Step 5: Terraform Apply Infra
       - name: Terraform Apply Infrastructure
         run: |
           cd infra/
