@@ -11,7 +11,7 @@ env:
   ARM_USE_CLI: false
 
 jobs:
-  # Job 1: Infrastructure Azure uniquement
+  # Job 1: Infrastructure Azure
   infra:
     runs-on: ubuntu-latest
     timeout-minutes: 30
