@@ -22,7 +22,7 @@ variable "node_size" {
 
 variable "kubernetes_version" {
   description = "Kubernetes version for AKS cluster"
-  default     = "1.30"
+  default     = "1.33"
 }
 
 variable "acr_name" {
