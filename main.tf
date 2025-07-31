@@ -109,16 +109,14 @@ resource "azurerm_role_assignment" "aks_acr_binding" {
 
 # GitOps: FluxCD
 resource "helm_release" "flux" {
-  name       = "flux"
-  repository = "https://fluxcd-community.github.io/helm-charts"
-  chart      = "flux2"
-  namespace  = "flux-system"
-
+  name             = "flux2"
+  repository       = "https://fluxcd-community.github.io/helm-charts"
+  chart            = "flux2"
+  version          = "2.12.0"
+  namespace        = "flux-system"
   create_namespace = true
 
-  depends_on = [
-    azurerm_kubernetes_cluster.rg-1
-  ]
+  depends_on = [azurerm_kubernetes_cluster.rg-1]
 }
 
 resource "kubernetes_secret" "flux_git_auth" {
