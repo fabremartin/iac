@@ -5,7 +5,7 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }*/
   }
-  #subscription_id = "for deletion purpose"
+  subscription_id = "21a0af28-30ac-4bc4-8d63-e24531e7bd6c"
 }
 
 # Helm for GitOps
@@ -87,9 +87,11 @@ resource "azurerm_container_registry" "acr" {
 
 # Get the kubelet identity
 data "azurerm_user_assigned_identity" "kubelet_identity" {
-  resource_group_name = azurerm_kubernetes_cluster.rg-1.node_resource_group
   name                = "${azurerm_kubernetes_cluster.rg-1.name}-agentpool"
-  depends_on          = [azurerm_kubernetes_cluster.rg-1]
+  resource_group_name = azurerm_kubernetes_cluster.rg-1.node_resource_group
+  depends_on = [
+    azurerm_kubernetes_cluster.rg-1
+  ]
 }
 
 # Link ACR to AKS
@@ -97,7 +99,10 @@ resource "azurerm_role_assignment" "aks_acr_binding" {
   principal_id         = data.azurerm_user_assigned_identity.kubelet_identity.principal_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.acr.id
-  depends_on           = [azurerm_kubernetes_cluster.rg-1]
+  depends_on = [
+    azurerm_kubernetes_cluster.rg-1,
+    azurerm_container_registry.acr
+  ]
 }
 
 
