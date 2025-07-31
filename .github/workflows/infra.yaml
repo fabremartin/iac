@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   
 env:
-  # VAR env
+  # Env Var
   ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
   ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
   ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
@@ -26,12 +26,33 @@ jobs:
         with:
           terraform_version: '1.4.0'
 
+      # Step 3: Azure Login for kubectl
+      - name: Set up Azure Credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} 
 
       # Step 4: Terraform init
       - name: Terraform Init
         run: terraform init -upgrade
 
-      # Step 5: Terraform plan
+      # Step 5: Refresh state
+      - name: Fix State Issues
+        run: |
+          # Refresh l'état avec target spécifique
+          terraform refresh -target=data.azurerm_user_assigned_identity.kubelet_identity
+          # Ou skip refresh si problème persiste
+          # terraform plan -refresh=false -out=tfplan
+
+      # Step 6: kubectl pour AKS
+      - name: Setup kubectl for AKS
+        run: |
+          # Récupérer les credentials AKS
+          az aks get-credentials --resource-group $(terraform output -raw resource_group_name) --name $(terraform output -raw kubernetes_cluster_name) --overwrite-existing
+          # Vérifier la connexion
+          kubectl cluster-info
+
+      # Step 7: Terraform plan
       - name: Terraform Plan
         run: terraform plan -out=tfplan
         id: plan
@@ -39,13 +60,11 @@ jobs:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
           TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
           TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
-          KUBECONFIG: ${{ env.KUBECONFIG }}
 
-      # Step 6: Terraform apply
+      # Step 8: Terraform apply
       - name: Terraform apply
         run: terraform apply -auto-approve tfplan
         env:
             TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
             TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
             TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
-            KUBECONFIG: ${{ env.KUBECONFIG }}
