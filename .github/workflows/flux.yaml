@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "Creating Docker Registry secret..."
           kubectl create secret docker-registry flux-azure-registry \
-          --docker-server=registry14032025.azurecr.io \
+          --docker-server=regsitry14032025.azurecr.io \
           --docker-username="${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}" \
           --docker-password="${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}" \
           --namespace=default \
