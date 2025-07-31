@@ -8,48 +8,11 @@ provider "azurerm" {
   #subscription_id = "for deletion purpose"
 }
 
-# Helm for GitOps
-provider "helm" {
-  kubernetes {
-    host                   = azurerm_kubernetes_cluster.rg-1.kube_config[0].host
-    username               = azurerm_kubernetes_cluster.rg-1.kube_config[0].username
-    password               = azurerm_kubernetes_cluster.rg-1.kube_config[0].password
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate)
-  }
-}
-
-
-# Kubernetes provider for interacting with the cluster
-provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.rg-1.kube_config.0.host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.cluster_ca_certificate)
-}
-
 # ResourceGroup creation
 resource "azurerm_resource_group" "rg-1" {
   name     = var.resource_group_name
   location = var.location
 }
-
-# Grafana creation - Skipping this for now
-/*resource "azurerm_dashboard_grafana" "example" {
-  name                = var.grafana_name
-  grafana_major_version = 10
-  resource_group_name = azurerm_resource_group.rg-1.name
-  location            = azurerm_resource_group.rg-1.location
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  tags = {
-    Environment = "Production" //Not needed now
-  }
-}*/
 
 
 # AKS Cluster creation
@@ -78,6 +41,47 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
     type = "SystemAssigned"
   }
 }
+
+# Helm for GitOps
+provider "helm" {
+  kubernetes {
+    host                   = azurerm_kubernetes_cluster.rg-1.kube_config[0].host
+    username               = azurerm_kubernetes_cluster.rg-1.kube_config[0].username
+    password               = azurerm_kubernetes_cluster.rg-1.kube_config[0].password
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate)
+  }
+}
+
+
+# Kubernetes provider for interacting with the cluster
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.rg-1.kube_config.0.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.cluster_ca_certificate)
+}
+
+
+# Grafana creation - Skipping this for now
+/*resource "azurerm_dashboard_grafana" "example" {
+  name                = var.grafana_name
+  grafana_major_version = 10
+  resource_group_name = azurerm_resource_group.rg-1.name
+  location            = azurerm_resource_group.rg-1.location
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    Environment = "Production" //Not needed now
+  }
+}*/
+
+
+
 
 # ACR
 resource "azurerm_container_registry" "acr" {
