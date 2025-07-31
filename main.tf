@@ -8,12 +8,28 @@ provider "azurerm" {
   #subscription_id = "for deletion purpose"
 }
 
+# Kubernetes provider for interacting with the cluster
+provider "kubernetes" {
+  host                   = try(azurerm_kubernetes_cluster.rg-1.kube_config[0].host, "")
+  client_certificate     = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate), "")
+  client_key             = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key), "")
+  cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate), "")
+}
+# Helm for GitOps
+provider "helm" {
+  kubernetes {
+    host                   = try(azurerm_kubernetes_cluster.rg-1.kube_config[0].host, "")
+    client_certificate     = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate), "")
+    client_key             = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key), "")
+    cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate), "")
+  }
+}
+
 # ResourceGroup creation
 resource "azurerm_resource_group" "rg-1" {
   name     = var.resource_group_name
   location = var.location
 }
-
 
 # AKS Cluster creation
 resource "azurerm_kubernetes_cluster" "rg-1" {
@@ -41,26 +57,6 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
     type = "SystemAssigned"
   }
 }
-
-
-# Kubernetes provider for interacting with the cluster
-provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.rg-1.kube_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate)
-}
-
-# Helm for GitOps
-provider "helm" {
-  kubernetes {
-    host                   = azurerm_kubernetes_cluster.rg-1.kube_config[0].host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate)
-  }
-}
-
 
 # Grafana creation - Skipping this for now
 /*resource "azurerm_dashboard_grafana" "example" {
