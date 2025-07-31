@@ -17,7 +17,7 @@ provider "kubernetes" {
 }
 # Helm for GitOps
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = try(azurerm_kubernetes_cluster.rg-1.kube_config[0].host, "")
     client_certificate     = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate), "")
     client_key             = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key), "")
