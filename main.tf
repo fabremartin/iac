@@ -1,4 +1,4 @@
-# Azure
+# Azure provider
 provider "azurerm" {
   features {
     /*resource_group {
@@ -6,23 +6,6 @@ provider "azurerm" {
     }*/
   }
   #subscription_id = "for deletion purpose"
-}
-
-# Kubernetes provider for interacting with the cluster
-provider "kubernetes" {
-  host                   = try(azurerm_kubernetes_cluster.rg-1.kube_config[0].host, "")
-  client_certificate     = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate), "")
-  client_key             = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key), "")
-  cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate), "")
-}
-# Helm for GitOps
-provider "helm" {
-  kubernetes = {
-    host                   = try(azurerm_kubernetes_cluster.rg-1.kube_config[0].host, "")
-    client_certificate     = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate), "")
-    client_key             = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key), "")
-    cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate), "")
-  }
 }
 
 # ResourceGroup creation
@@ -58,25 +41,6 @@ resource "azurerm_kubernetes_cluster" "rg-1" {
   }
 }
 
-# Grafana creation - Skipping this for now
-/*resource "azurerm_dashboard_grafana" "example" {
-  name                = var.grafana_name
-  grafana_major_version = 10
-  resource_group_name = azurerm_resource_group.rg-1.name
-  location            = azurerm_resource_group.rg-1.location
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  tags = {
-    Environment = "Production" //Not needed now
-  }
-}*/
-
-
-
-
 # ACR
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
@@ -106,37 +70,18 @@ resource "azurerm_role_assignment" "aks_acr_binding" {
   ]
 }
 
+# Grafana creation - Skipping this for now
+/*resource "azurerm_dashboard_grafana" "example" {
+  name                = var.grafana_name
+  grafana_major_version = 10
+  resource_group_name = azurerm_resource_group.rg-1.name
+  location            = azurerm_resource_group.rg-1.location
 
-# GitOps: FluxCD
-resource "helm_release" "flux" {
-  name             = "flux2"
-  repository       = "https://fluxcd-community.github.io/helm-charts"
-  chart            = "flux2"
-  version          = "2.12.0"
-  namespace        = "flux-system"
-  create_namespace = true
-
-  depends_on = [azurerm_kubernetes_cluster.rg-1]
-}
-
-resource "kubernetes_secret" "flux_git_auth" {
-  metadata {
-    name      = "fluxcd-key"
-    namespace = "flux-system"
+  identity {
+    type = "SystemAssigned"
   }
 
-  type = "Opaque"
-  data = {
-    identity       = var.fluxcd_key
-    "identity.pub" = var.fluxcd_key_pub
-    known_hosts    = var.known_hosts
+  tags = {
+    Environment = "Production" //Not needed now
   }
-
-  depends_on = [helm_release.flux]
-}
-
-# Output: Display kubeconfig infos to connect
-output "kubeconfig" {
-  value     = azurerm_kubernetes_cluster.rg-1.kube_config_raw
-  sensitive = true
-}
+}*/

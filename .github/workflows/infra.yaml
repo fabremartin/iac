@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
   
 env:
-  # Env Var
   ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
   ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
   ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
@@ -12,44 +11,104 @@ env:
   ARM_USE_CLI: false
 
 jobs:
-  terraform:
+  # Job 1: Infrastructure Azure uniquement
+  infra:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      # Step 1: source code checkout
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Terraform setup
+      # Step 2: Setup Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '1.4.0'
+          terraform_wrapper: false
 
-      # Step 3: Azure Login for kubectl
+      # Step 3: Terraform Init Infra
+      - name: Terraform Init Infrastructure
+        run: |
+          cd infra/
+          terraform init -upgrade
+
+      # Step 4: Terraform Plan Infra
+      - name: Terraform Plan Infrastructure
+        run: |
+          cd infra/
+          terraform plan -out=tfplan
+
+      # Step 5: Terraform Apply Infra
+      - name: Terraform Apply Infrastructure
+        run: |
+          cd infra/
+          terraform apply -auto-approve tfplan
+
+  # Job 2: Applications Kubernetes (après infrastructure)
+  kubernetes:
+    needs: infra
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.4.0'
+          terraform_wrapper: false
+
+      # Step 3: Azure Login pour kubectl
       - name: Set up Azure Credentials
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }} 
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Step 4: Terraform init
-      - name: Terraform Init
-        run: terraform init -upgrade
+      # Step 4: Configure kubectl
+      - name: Configure kubectl
+        run: |
+          az aks get-credentials \
+            --resource-group rg-1 \
+            --name cluster-aks \
+            --admin \
+            --overwrite-existing
 
+      # Step 5: Terraform Init K8s
+      - name: Terraform Init Kubernetes
+        run: |
+          cd k8s/
+          terraform init -upgrade
 
-      # Step 5: Terraform plan
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        id: plan
+      # Step 6: Terraform Plan K8s
+      - name: Terraform Plan Kubernetes
+        run: |
+          cd k8s/
+          terraform plan -out=tfplan
         env:
           TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
           TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
           TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      # Step 6: Terraform apply
-      - name: Terraform apply
-        run: terraform apply -auto-approve tfplan
+      # Step 7: Terraform Apply K8s
+      - name: Terraform Apply Kubernetes
+        run: |
+          cd k8s/
+          terraform apply -auto-approve tfplan
         env:
-            TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
-            TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
-            TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          TF_VAR_fluxcd_key: ${{ secrets.FLUXCD_KEY }}
+          TF_VAR_fluxcd_key_pub: ${{ secrets.FLUXCD_KEY_PUB }}
+          TF_VAR_known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      # Step 8: Vérification finale
+      - name: Verify Deployment
+        run: |
+          kubectl get namespaces
+          kubectl get pods -n flux-system
+          kubectl get secrets -n flux-system
+          helm list -n flux-system
