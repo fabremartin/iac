@@ -28,6 +28,13 @@ jobs:
           terraform_version: '1.4.0'
           terraform_wrapper: false
 
+          
+      # Step 3: Azure Login pour kubectl
+      - name: Set up Azure Credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       # Step 3: Bootstrap backend if needed
       - name: Ensure backend exists
         run: |
