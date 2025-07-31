@@ -51,10 +51,11 @@ jobs:
 
       - name: Create ACR secret for Flux
         run: |
+          echo "Creating Docker Registry secret..."
           kubectl create secret docker-registry flux-azure-registry \
-            --docker-server=regsitry14032025.azurecr.io \
-            --docker-username=${{ secrets.SERVICE_PRINCIPAL_ID }} \
-            --docker-password=${{ secrets.SERVICE_PRINCIPAL_KEY }} \
-            --namespace=default \
-            --dry-run=client -o yaml | kubectl apply -f -
+          --docker-server=registry14032025.azurecr.io \
+          --docker-username="${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}" \
+          --docker-password="${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}" \
+          --namespace=default \
+          --dry-run=client -o yaml | kubectl apply -f -
           
