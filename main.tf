@@ -5,18 +5,21 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }*/
   }
-  subscription_id = "21a0af28-30ac-4bc4-8d63-e24531e7bd6c"
+  #subscription_id = "for deletion purpose"
 }
 
 # Helm for GitOps
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.rg-1.kube_config.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config.0.cluster_ca_certificate)
+    host                   = azurerm_kubernetes_cluster.rg-1.kube_config[0].host
+    username               = azurerm_kubernetes_cluster.rg-1.kube_config[0].username
+    password               = azurerm_kubernetes_cluster.rg-1.kube_config[0].password
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.rg-1.kube_config[0].cluster_ca_certificate)
   }
 }
+
 
 # Kubernetes provider for interacting with the cluster
 provider "kubernetes" {
