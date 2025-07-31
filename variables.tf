@@ -13,11 +13,11 @@ variable "location" {
 }
 
 variable "node_count" {
-  default = 2
+  default = 1
 }
 
 variable "node_size" {
-  default = "Standard_DS2_v2"
+  default = "Standard_B2s"
 }
 
 variable "kubernetes_version" {
