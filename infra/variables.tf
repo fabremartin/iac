@@ -13,16 +13,16 @@ variable "location" {
 }
 
 variable "node_count" {
-  default = 2
+  default = 1
 }
 
 variable "node_size" {
-  default = "Standard_DS2_v2"
+  default = "Standard_B2s"
 }
 
 variable "kubernetes_version" {
   description = "Kubernetes version for AKS cluster"
-  default     = "1.30"
+  default     = "1.33"
 }
 
 variable "acr_name" {
@@ -35,21 +35,6 @@ variable "sku" {
   description = "ACR SKU (Basic, Standard, Premium)"
   type        = string
   default     = "Basic"
-}
-
-variable "fluxcd_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "fluxcd_key_pub" {
-  type      = string
-  sensitive = true
-}
-
-variable "known_hosts" {
-  type      = string
-  sensitive = true
 }
 
 variable "grafana_name" {

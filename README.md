@@ -32,19 +32,31 @@ This solution follows a two-phased approach:
 .
 ├── .github/
 │   └── workflows/
-│       └── infra.yml     # GitHub Actions workflow for the Infra configuration
+│       └── infra.yml     # GitHub Actions workflow for the Infra & Kubernetes configuration - 2 separates jobs
 │       └── flux.yml      # GitHub Actions workflow for FluxCD configuration
+│
 ├── gitops/
 │   ├── kustomization.yaml          # Kustomization file to be applied
 │   └── git-repository.yaml         # GitRepo file to be applied
-├── main.tf                         # Main Terraform configuration
-├── variables.tf                    # Variables for the main configuration
+│
+├── k8s/
+│   ├── main.tf          # main.tf for the k8s config
+│   └── backend.tf         # backend corresponding to the k8s
+│   └── variables.tf         # variables k8s
+│
+├── infra/
+│   ├── main.tf          # main.tf for the infra config
+│   └── backend.tf         # backend corresponding to the infra
+│   └── variables.tf         # variables infra 
+│   └── outputs.tf         # pass kubeconfig values to k8s
+│
 └── README.md                       # This file
 ```
 
 ## Variables
 
-Currently, most variables are stored as GitHub secrets. A more secure and scalable approach would be to store them in Azure Key Vault in the future.
+The **Terraform state** is stored in a **Azure Blob Storage** for collaboration, state locking, and versioning. Also it is in a dedicated rg to make sure there are not conflicts.
+Currently, most variables are stored as GitHub secrets. A more secure and scalable approach would be to store them in Azure Key Vault or Hashicorp Vault in the future.
 
 ```hcl
 resource_group_name = "aks-demo-rg"
@@ -134,7 +146,6 @@ terraform destroy
 - **Use Azure Key Vault** for secure storage of secrets and manage access via **Azure RBAC**.
 - **System-assigned Managed Identity** for AKS enhances security by avoiding credentials management. Consider using **Azure AD** integration for tighter access control.
 - Enable **Network Policies** and use **Private Endpoints** for services to restrict access to private networks.
-- Store **Terraform state** in **Azure Blob Storage** for collaboration, state locking, and versioning.
 - Automate **Grafana deployment** with Terraform and assign appropriate **Azure RBAC roles** for secure access.
 - Set up a **full landing zone** with **VNET**, **IAM**, **Key Vault**, **NSGs**, and **Firewalls** for enhanced security.
 - Follow **least privilege access** with **MFA** for privileged accounts and regularly audit permissions.
